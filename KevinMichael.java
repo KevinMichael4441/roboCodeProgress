@@ -1,6 +1,6 @@
 package KM;
 import robocode.*;
-//import java.awt.Color;
+import java.awt.Color;
 
 // API help : https://robocode.sourceforge.io/docs/robocode/robocode/Robot.html
 
@@ -18,15 +18,16 @@ public class KevinMichael extends Robot
 		// After trying out your robot, try uncommenting the import at the top,
 		// and the next line:
 
-		// setColors(Color.red,Color.blue,Color.green); // body,gun,radar
+		setColors(Color.green,Color.pink,Color.green); // body,gun,radar
 
 		// Robot main loop
 		while(true) {
 			// Replace the next 4 lines with any behavior you would like	
-			ahead(30);
+			ahead(52);
 			turnGunRight(360);
-			back(30);
+			back(52);
 			turnGunRight(360);
+			stayInBounds();
 		}
 	}
 
@@ -35,7 +36,7 @@ public class KevinMichael extends Robot
 	 */
 	public void onScannedRobot(ScannedRobotEvent e) {
 		// Replace the next line with any behavior you would like
-		fire(1);
+		fire(3);
 	}
 
 	/**
@@ -43,14 +44,43 @@ public class KevinMichael extends Robot
 	 */
 	public void onHitByBullet(HitByBulletEvent e) {
 		// Replace the next line with any behavior you would like
-		back(10);
+		back(15);
+		stayInBounds();
 	}
 	
-	/**
-	 * onHitWall: What to do when you hit a wall
-	 */
-	public void onHitWall(HitWallEvent e) {
-		// Replace the next line with any behavior you would like
-		back(20);
-	}	
+	public void stayInBounds() 
+	{
+		
+	//int sentrySize = getSentryBorderSize();
+	// We know sentrySize will be 300 so hardcoding	
+	
+		if (getX() < 300)
+		{
+			while (getHeading() >= 87.5 && getHeading() <= 92.5)
+			{
+				turnRight(5);
+			}	 
+		}
+		if (getX() > 500)
+		{
+			while (getHeading() >= 267.5 && getHeading() <= 272.5)
+			{
+				turnLeft(5);
+			}	 
+		}
+		if (getY() > 500)
+		{
+			while (getHeading() >= 177.5 && getHeading() <= 182.5)
+			{
+				turnLeft(5);
+			}	 
+		}
+		if (getY() < 300)
+		{
+			while (getHeading() >= -2.5 && getHeading() <= 2.5)
+			{
+				turnRight(5);
+			}	 
+		}
+	}
 }
