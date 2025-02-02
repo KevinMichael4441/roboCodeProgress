@@ -54,7 +54,7 @@ Fleadh Rules redo
 New Additions: 
 Added staying inside sentry border
 Added removed shooting at sentry (will have to deal with this for Semi)
- 
+Understood and incorporated Track firing from the TrackFire Bot 
 
 
 
