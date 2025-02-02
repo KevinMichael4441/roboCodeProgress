@@ -48,4 +48,15 @@ Fleadh Rules redo
 20-20 - 6694
 25-25 - 5076
 
+//------------------------------------------------------------------------//
+
+
+New Additions: 
+Added staying inside sentry border
+Added removed shooting at sentry (will have to deal with this for Semi)
+ 
+
+
+
+
 

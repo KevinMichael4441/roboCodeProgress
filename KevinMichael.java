@@ -35,8 +35,12 @@ public class KevinMichael extends Robot
 	 * onScannedRobot: What to do when you see another robot
 	 */
 	public void onScannedRobot(ScannedRobotEvent e) {
-		// Replace the next line with any behavior you would like
-		fire(3);
+		// Problem with this is losing in Semi-Finals :(
+		// We'll cross that bridge then
+		if (!e.isSentryRobot())
+		{
+			fire(4);
+		}	
 	}
 
 	/**
@@ -51,36 +55,41 @@ public class KevinMichael extends Robot
 	public void stayInBounds() 
 	{
 		
-	//int sentrySize = getSentryBorderSize();
-	// We know sentrySize will be 300 so hardcoding	
+	int sentrySize = getSentryBorderSize();				// = 300
+	int fieldHeight = (int)getBattleFieldHeight();		// = 800
+	int fieldWidth = (int)getBattleFieldWidth();		// = 800	
 	
-		if (getX() < 300)
+		if (getX() < sentrySize)
 		{
 			while (getHeading() >= 87.5 && getHeading() <= 92.5)
 			{
 				turnRight(5);
 			}	 
+			ahead(52);
 		}
-		if (getX() > 500)
+		if (getX() > fieldWidth - sentrySize)
 		{
 			while (getHeading() >= 267.5 && getHeading() <= 272.5)
 			{
 				turnLeft(5);
-			}	 
+			}
+			ahead(52);	 
 		}
-		if (getY() > 500)
+		if (getY() > fieldHeight - sentrySize)
 		{
 			while (getHeading() >= 177.5 && getHeading() <= 182.5)
 			{
 				turnLeft(5);
 			}	 
+			ahead(52);
 		}
-		if (getY() < 300)
+		if (getY() < sentrySize)
 		{
 			while (getHeading() >= -2.5 && getHeading() <= 2.5)
 			{
 				turnRight(5);
-			}	 
+			}
+			ahead(52);	 
 		}
 	}
 }
