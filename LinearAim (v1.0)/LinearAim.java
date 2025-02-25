@@ -51,12 +51,11 @@ public class LinearAim extends Robot
 	
 	public void linearFiring(double t_oppHeading, double t_oppVelocity)
 	{
-		boolean canShoot = true;
 		double xPos = getX();		// Our bot's X coords
 		double yPos = getY();		// Our bot's Y coords
 		
-		double timeElapsed = 0;	// time elapsed (for calculation of prediction) in while loop
-		// (PS. NOT real-time elapsed)
+		double timeElapsed = 1;	// since distance cannot be 0, we start with 1	
+		// time elapsed (for calculation of prediction) in while loop (PS. NOT real-time)
 		
 		double bulletPower = 3.0;	
 		
@@ -68,12 +67,12 @@ public class LinearAim extends Robot
 		
 		double gunHeading = getGunHeading();	// where our gun is pointing
 		
-		while((++timeElapsed) * (20-3.0*bulletPower) < Point2D.Double.distance(xPos,yPos, predictedX, predictedY))
+		double bulletVelocity = 20-3.0*bulletPower;	// speed of bullet based on robocode formula
+		
+		while((timeElapsed) * bulletVelocity < Point2D.Double.distance(xPos,yPos, predictedX, predictedY))
+		// Point2D.Double.distance is used to find the magnitude of distance vector between two points (our bot and opp's predicted location)
+		// if velocity is LESS than pred location, bullet will fall short => we run loop till they are equal.
 		{
-			
-			placeHolderX = predictedX;
-			placeHolderY = predictedY;
-				
 			predictedX += Math.sin(t_oppHeading) * t_oppVelocity;
 			predictedY += Math.cos(t_oppHeading) * t_oppVelocity;
 			
@@ -84,6 +83,8 @@ public class LinearAim extends Robot
 				// ^ making sure the predicted values are valid
 				break;
 			}
+			
+			timeElapsed++;
 		}
 		
 		double angle = normalAbsoluteAngle(Math.atan2(predictedX - xPos, predictedY-yPos));	
