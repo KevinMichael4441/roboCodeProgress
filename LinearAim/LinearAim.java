@@ -44,13 +44,8 @@ public class LinearAim extends Robot
 	
 	public void linearFiring(double t_oppHeading, double t_oppVelocity)
 	{
-		out.println("oppVelocity from robocode: " + t_oppVelocity);
-		out.println("oppHeading: " + t_oppHeading);
 		double xPos = getX();		// Our bot's X coords
-		double yPos = getY();		// Our bot's Y coords
-		
-		out.println("Our X: " + xPos);
-		out.println("Our Y: " + yPos);		
+		double yPos = getY();		// Our bot's Y coords	
 
 		double timeElapsed = 1;	// since distance cannot be 0, we start with 1	
 		// time elapsed (for calculation of prediction) in while loop (PS. NOT real-time)
@@ -60,16 +55,10 @@ public class LinearAim extends Robot
 		double predictedX = oppX;	// Opp's X that is calculated with time
 		double predictedY = oppY; 	// Opp's Y that is calculated with time
 		
-		out.println("oppX: " + oppX);
-		out.println("oppY: " + oppY);
-			
-		out.println("oppVelocity from calculation: " + t_oppVelocity);
 		double gunHeading = getGunHeading();	// where our gun is pointing
 		
 		double bulletVelocity = 20-3.0*bulletPower;	// speed of bullet based on robocode formula
 		
-		out.println("Math.sin(t_oppHeading): " + Math.sin(t_oppHeading));
-		out.println("Math.cos(t_oppHeading): " + Math.cos(t_oppHeading));
 		while((timeElapsed) * bulletVelocity < Point2D.Double.distance(xPos,yPos, predictedX, predictedY))
 		// Point2D.Double.distance is used to find the magnitude of distance vector between two points (our bot and opp's predicted location)
 		// if velocity is LESS than pred location, bullet will fall short => we run loop till they are equal.
@@ -77,10 +66,6 @@ public class LinearAim extends Robot
 
 			predictedX += Math.sin(Math.toRadians(t_oppHeading)) * t_oppVelocity;
 			predictedY += Math.cos(Math.toRadians(t_oppHeading)) * t_oppVelocity;
-			
-			out.println("Time: " + timeElapsed);
-			out.println("predX = " + predictedX);
-			out.println("predY = " + predictedY);
 
 			if(predictedX < halfRW || predictedY < halfRW || predictedX > (arenaSize - halfRW) || predictedY > (arenaSize - halfRW)) 
 			{
@@ -106,7 +91,6 @@ public class LinearAim extends Robot
 		// (Math.toDegrees(angle - Math.toRadians(gunHeading))) converts ^ angle to Degrees (0-360)
 		// normalRelativeAngleDegrees to normalize relative angles ((-180)-0 or 0-180) for optimization
 		
-		out.println("-----------------------------------");
 		if (getGunHeat() == 0)	// calling fire only when gun heat is 0 so as to not waste turns (calling fire() uses a turn)
 		{
 			fire(bulletPower);
