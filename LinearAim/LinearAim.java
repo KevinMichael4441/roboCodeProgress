@@ -16,12 +16,26 @@ public class LinearAim extends Robot
 	double oppX;					// X coords of opp
 	double oppY;					// Y coords of opp
 	
+	int fireTurn = 0;
+	int fireMode = 0;				// shooting mode is linear in the beginning
+	int bulletsMissed = 0;		
+	int turnForAverage = 0;		// no. of turns for average aim calculation
+	
+	final int LINEAR = 0;			// int repr for linear targeting 
+	final int AVERAGE = 1;		// int repr for targeting average position of bot (against oscillators)
+	final int HEAD_ON = 2;		// int repr for simply shooting where opp is
+
+	final int MAX_VALUES = 10;	// Accuracy for our average prediction
+	double oppXArray[] = new double[MAX_VALUES];
+	double oppYArray[] = new double[MAX_VALUES];
+	
+	
 	final double robotWidth = 36.0;							// width of robot for (width/2) 
 	final double halfRW = robotWidth/2 - 0.0004441;			//  Width/2 for stopping prediction when robot out of bounds 
 	// subtracting a tiny amount coz of double rounding issues giving values like 17.99999999 or 782.0000000001
 	
 	final double arenaSize = 800.0;
-	// final is like const
+	// final is like const			dynamicFiring(e.getHeading(), e.getVelocity(), e.getBearing());
 
 	public void run() {
 		setColors(Color.red,Color.yellow,Color.yellow); // body,gun,radar
@@ -30,22 +44,24 @@ public class LinearAim extends Robot
 		{
 			turnRadarRight(45);
 		}
-		
 	}
 
 	public void onScannedRobot(ScannedRobotEvent e) {
 		if (!e.isSentryRobot())
 		{
 			oppCalculation(e.getDistance(), e.getBearing());
-			//dynamicFiring(e.getHeading(), e.getVelocity(), e.getBearing());
-			justFire(e.getBearing());
+			updateAverage();
+			if (getGunHeat() == 0)	// calling fire only when gun heat is 0 so as to not waste turns (calling fire() uses a turn)
+			{
+				dynamicFiring(e.getHeading(), e.getVelocity(), e.getBearing());
+			}
 		}
 	}
 	
 	public void linearFiring(double t_oppHeading, double t_oppVelocity)
 	{
 		double xPos = getX();		// Our bot's X coords
-		double yPos = getY();		// Our bot's Y coords	
+		double yPos = getY();		// Our bot's Y coords
 
 		double timeElapsed = 1;	// since distance cannot be 0, we start with 1	
 		// time elapsed (for calculation of prediction) in while loop (PS. NOT real-time)
@@ -54,7 +70,7 @@ public class LinearAim extends Robot
 		
 		double predictedX = oppX;	// Opp's X that is calculated with time
 		double predictedY = oppY; 	// Opp's Y that is calculated with time
-		
+
 		double gunHeading = getGunHeading();	// where our gun is pointing
 		
 		double bulletVelocity = 20-3.0*bulletPower;	// speed of bullet based on robocode formula
@@ -66,7 +82,7 @@ public class LinearAim extends Robot
 
 			predictedX += Math.sin(Math.toRadians(t_oppHeading)) * t_oppVelocity;
 			predictedY += Math.cos(Math.toRadians(t_oppHeading)) * t_oppVelocity;
-
+			
 			if(predictedX < halfRW || predictedY < halfRW || predictedX > (arenaSize - halfRW) || predictedY > (arenaSize - halfRW)) 
 			{
 				//sometimes it becomes 17.9999999 and sometimes 782.000000001 => loop will only run once
@@ -91,10 +107,7 @@ public class LinearAim extends Robot
 		// (Math.toDegrees(angle - Math.toRadians(gunHeading))) converts ^ angle to Degrees (0-360)
 		// normalRelativeAngleDegrees to normalize relative angles ((-180)-0 or 0-180) for optimization
 		
-		if (getGunHeat() == 0)	// calling fire only when gun heat is 0 so as to not waste turns (calling fire() uses a turn)
-		{
-			fire(bulletPower);
-		}
+		fire(bulletPower);
 
 	}
 	
@@ -107,13 +120,36 @@ public class LinearAim extends Robot
 	
 	public void dynamicFiring(double t_oppHeading, double t_oppVelocity, double t_oppBearing)
 	{
-		if (isNear(t_oppVelocity, -8.0) || isNear(t_oppVelocity, 8.0) || isNear(t_oppVelocity, 0))
+		fireTurn++;
+		turnForAverage++;
+		if (fireTurn % 7 == 0 )		// checking how many bullets Hit every 5 turns
+		
+		// 7 up and 2 below are arbitrary values and needs more testing
 		{
+			if (bulletsMissed > 2)	// changing shoot mode when more than 3 bullets miss
+			{
+				fireMode++;
+			}
+			fireTurn = 0;
+			bulletsMissed = 0;
+		}
+		out.println("fireTurn: " + fireTurn);
+		out.println("BulletsMissed: " + bulletsMissed);
+		
+		if (fireMode % 3 == LINEAR)
+		{
+			out.println("Linear targeting");
 			linearFiring(t_oppHeading, t_oppVelocity);
 		}
-		else	
+		else if (fireMode % 3 == AVERAGE && turnForAverage > MAX_VALUES)
+		{
+			averageFire();
+			out.println("Average targeting");
+		}
+		else
 		{
 			justFire(t_oppBearing);
+			out.println("Head-On targeting");
 		}
 	}
 	
@@ -122,9 +158,40 @@ public class LinearAim extends Robot
 		double absoluteBearing = getHeading() + t_oppBearing;
 		turnGunRight(normalRelativeAngleDegrees(absoluteBearing - getGunHeading()));
 		
-		if (getGunHeat() == 0)	// calling fire only when gun heat is 0 so as to not waste turns (calling fire() uses a turn)
+		fire(3);
+	}
+	
+	public void averageFire()
+	{
+		double sumX = 0;
+		double sumY = 0;
+		
+		for (int i = 0; i < MAX_VALUES; i++)
 		{
-			fire(3);
+			sumX += oppXArray[i];
+			sumY += oppYArray[i];
 		}
+		
+		double avgX = sumX / MAX_VALUES;
+		double avgY = sumY / MAX_VALUES;
+		
+
+		out.println("Avg X: " + avgX);
+		out.println("Avg Y: " + avgY);
+		double angle = normalAbsoluteAngle(Math.atan2(avgX - getX(), avgY - getY()));
+		turnGunRight(normalRelativeAngleDegrees(Math.toDegrees(angle - Math.toRadians(getGunHeading()))));
+		
+		fire(3);
+	}
+		
+	public void onBulletMissed(BulletMissedEvent e)
+	{
+		bulletsMissed++;
+	}
+	
+	public void updateAverage()
+	{
+		oppXArray[turnForAverage % 10] = oppX;
+		oppYArray[turnForAverage % 10] = oppY;
 	}
 }
