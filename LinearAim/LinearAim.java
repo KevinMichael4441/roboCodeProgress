@@ -25,17 +25,16 @@ public class LinearAim extends Robot
 	final int AVERAGE = 1;		// int repr for targeting average position of bot (against oscillators)
 	final int HEAD_ON = 2;		// int repr for simply shooting where opp is
 
-	final int MAX_VALUES = 10;	// Accuracy for our average prediction
+	final int MAX_VALUES = 20;	// Accuracy for our average prediction
 	double oppXArray[] = new double[MAX_VALUES];
 	double oppYArray[] = new double[MAX_VALUES];
-	
 	
 	final double robotWidth = 36.0;							// width of robot for (width/2) 
 	final double halfRW = robotWidth/2 - 0.0004441;			//  Width/2 for stopping prediction when robot out of bounds 
 	// subtracting a tiny amount coz of double rounding issues giving values like 17.99999999 or 782.0000000001
 	
 	final double arenaSize = 800.0;
-	// final is like const			dynamicFiring(e.getHeading(), e.getVelocity(), e.getBearing());
+	// final is like const		
 
 	public void run() {
 		setColors(Color.red,Color.yellow,Color.yellow); // body,gun,radar
@@ -121,9 +120,7 @@ public class LinearAim extends Robot
 	public void dynamicFiring(double t_oppHeading, double t_oppVelocity, double t_oppBearing)
 	{
 		fireTurn++;
-		turnForAverage++;
-		if (fireTurn % 7 == 0 )		// checking how many bullets Hit every 5 turns
-		
+		if (fireTurn % 6 == 0 )		// checking how many bullets Hit every 5 turns
 		// 7 up and 2 below are arbitrary values and needs more testing
 		{
 			if (bulletsMissed > 2)	// changing shoot mode when more than 3 bullets miss
@@ -191,7 +188,8 @@ public class LinearAim extends Robot
 	
 	public void updateAverage()
 	{
-		oppXArray[turnForAverage % 10] = oppX;
-		oppYArray[turnForAverage % 10] = oppY;
+		turnForAverage++;
+		oppXArray[turnForAverage % MAX_VALUES] = oppX;
+		oppYArray[turnForAverage % MAX_VALUES] = oppY;
 	}
 }
