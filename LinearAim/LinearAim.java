@@ -13,19 +13,18 @@ import static robocode.util.Utils.normalRelativeAngleDegrees;
  */
 public class LinearAim extends Robot
 {
-	// Miscellaneuos Stuff
+	// Miscellaneous Variables
 	double oppX;					// X coords of opp
 	double oppY;					// Y coords of opp
 
 
-	// Radar Constants by Marie-Elise
-	double radarTurnDirection = 1;	
-	double opponentAngle;
+	// Radar Variables by Marie-Elise
+	double radarTurnDirection = 1;			// 1 or -1 for left or right of bot (or right or left)
+	double opponentAngle;					// Angle to opponent
 		
-	boolean initialSentryFound = false;
-	boolean initialOpponentFound = false;
-	boolean isClose = false;
-	boolean initialSentrySecond = false;
+	boolean initialSentryFound = false;		// check for first time seeing sentry
+	boolean initialOpponentFound = false;	// check for first time seeing opponent		
+	boolean initialSentrySecond = false;	// check for whether sentry was found (first or) second
 
 
 	// Targeting Variables by Kevim	
@@ -57,11 +56,13 @@ public class LinearAim extends Robot
 		while(initialSentryFound == false || initialOpponentFound == false)
 		{
 			turnRadarRight(45);
+			// keep sweeping till both are found
 		}
 		
 		while(true)
 		{
 			turnRadarRight(90 * radarTurnDirection);
+			// for this to run, radar must have lost opp. so we scan again in same radar direction once more to find
 		}
 
 	}
@@ -70,21 +71,25 @@ public class LinearAim extends Robot
 	
 		// Radar conditions by Marie-Elise
 		if (e.isSentryRobot() && initialOpponentFound == true && initialSentryFound == false)
+		// If Sentry is found AFTER opponent, go back to opponent (in the shortest route)
 		{
 			turnRadarRight(opponentAngle);
 		}
 		
 		if(e.isSentryRobot() && initialSentryFound == false)
+		// seeing sentry for the first time
 		{
 			initialSentryFound = true;
 		}
 		else if(initialOpponentFound == false && !e.isSentryRobot())
+		// seeing opponent for the first time
 		{
 			initialOpponentFound = true;
 			oppCalculation(e.getDistance(), e.getBearing());
 		}
 
 		if (initialOpponentFound && initialSentryFound && !e.isSentryRobot())
+		// if both are found and right now scanning opponent
 		{
 			oppCalculation(e.getDistance(), e.getBearing());
 			opponentScan();
